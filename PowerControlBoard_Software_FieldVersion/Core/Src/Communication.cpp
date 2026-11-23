@@ -1,4 +1,5 @@
 #include "Communication.hpp"
+#include <cmath>
 
 
 #ifdef WPT_HARDWARE
@@ -247,7 +248,7 @@ void rxDataHandler(const RxData &rd)
     if(rd.enableActiveChargingLimit)
     {
         ctrlData.vCapArrNormal = 
-            M_CLAMP(sqrtf((rd.activeChargingLimitRatio/255.0f)) * CAPARR_MAX_VOLTAGE, CAPARR_LOW_VOLTAGE, CAPARR_MAX_VOLTAGE);    
+            M_CLAMP(std::sqrt(rd.activeChargingLimitRatio / 255.0f) * CAPARR_MAX_VOLTAGE, CAPARR_LOW_VOLTAGE, CAPARR_MAX_VOLTAGE);
     }
     else
     {

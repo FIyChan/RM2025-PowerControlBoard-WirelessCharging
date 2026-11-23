@@ -117,7 +117,10 @@ int main(void)
   MX_OPAMP1_Init();
   /* USER CODE BEGIN 2 */
   extern void systemStart(void);
+
+  // 启动系统
   systemStart();
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */

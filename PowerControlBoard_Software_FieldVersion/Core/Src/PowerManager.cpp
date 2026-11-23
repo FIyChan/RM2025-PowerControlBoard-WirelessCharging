@@ -379,14 +379,15 @@ __attribute__((section(".code_in_ram"))) void updateMFLoop()
         ctrlData.allowCharge = true;
     }
 
-
-    if((ctrlData.allowCharge || !rxData1.enableActiveChargingLimit) && !psData.softStartCnt)//
+     //允许充电，或根本没启用主动充电限制，且不在软启动阶段
+    if((ctrlData.allowCharge || !rxData1.enableActiveChargingLimit) && !psData.softStartCnt)
     {
+        //根据裁判系统功率PID计算
         mfLoop.iRPID.computeDelta((ctrlData.pRefereeTarget / adcData.vA), adcData.iR);
         ctrlData.limitFactor = REFEREE_POWER;
     }
     else
-    {
+    {  //限制功率PID计算
         mfLoop.iRPID.computeDelta(6.0f / adcData.vA, adcData.iR);
         ctrlData.limitFactor = CAPARR_VOLTAGE_NORMAL;
     }
@@ -395,7 +396,7 @@ __attribute__((section(".code_in_ram"))) void updateMFLoop()
 
     // 默认设为裁判系统功率PID的输出
     mfLoop.deltaIL = mfLoop.iRPID.getOutput();
-
+    //电容过压 充电过流 放电过流
     mfLoop.dIL_VCap_Max = mfLoop.voltageLimitKI * (CAPARR_MAX_VOLTAGE - adcData.vCap);
     mfLoop.dIL_IB_Positive = mfLoop.currentLimitKI * (capStatus.maxInCurrent - adcData.iCap);
     mfLoop.dIL_IB_Negative = mfLoop.currentLimitKI * (-adcData.iCap - capStatus.maxOutCurrent);
@@ -404,16 +405,23 @@ __attribute__((section(".code_in_ram"))) void updateMFLoop()
     
     if((adcData.vCap > CAPARR_MAX_VOLTAGE * 0.95f) && (mfLoop.dIL_VCap_Max < mfLoop.deltaIL))
     {
+        //当电容电压超过 95% 上限
+        //且过压限幅值比当前 PID 输出更小时
+        //用 dIL_VCap_Max 覆盖 deltaIL，防止继续充电把电容冲过头。
         mfLoop.deltaIL = mfLoop.dIL_VCap_Max;
         ctrlData.limitFactor = CAPARR_VOLTAGE_MAX;
     }
     else if(adcData.iCap > capStatus.maxInCurrent && mfLoop.dIL_IB_Positive < mfLoop.deltaIL)
-    {
+    {   
+        //当充电电流超过最大允许电流
+        //且过流限幅值比当前 PID 输出更小时
+        //用 dIL_IB_Positive 覆盖 deltaIL，防止继续充电把电容冲过头。
         mfLoop.deltaIL = mfLoop.dIL_IB_Positive;
         ctrlData.limitFactor = IB_POSITIVE;
     }
     else if(adcData.iCap < -capStatus.maxOutCurrent && mfLoop.dIL_IB_Negative > mfLoop.deltaIL)
     {
+        //放电
         mfLoop.deltaIL = mfLoop.dIL_IB_Negative;
         ctrlData.limitFactor = IB_NEGATIVE;
     }
@@ -783,15 +791,18 @@ extern "C"
         // 计算ADC采样值
         ADC::updateADCmf();
         
-        // 更新BuckBoost功率级模式
+        // 更新BuckBoost功率级模式，根据 vB/vA 切换 Buck-Boost 工作模式
         HRTIM::modeStateMachine();
         
         if(psData.outputABEnabled)
         {
+            //短路保护
             Protection::checkShortCircuit();
-    
+
+            //计算电感电流目标
             PowerControl::updateMFLoop();
             
+            //写入 DAC 锯齿波（峰值电流模式）
             PowerControl::setInductorCurrent();
 
             Protection::checkEfficiency();
