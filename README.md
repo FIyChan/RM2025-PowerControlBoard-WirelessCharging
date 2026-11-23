@@ -2,6 +2,11 @@
 
 香港科技大学 RoboMaster ENTERPRIZE 战队的 RM2025 开源工程。本仓库由 FIyChan 从上游 fork，补充中文阅读索引。硬件、固件和技术报告由原作者发布。
 
+## 版本选择
+
+- [`main`](https://github.com/FIyChan/RM2025-PowerControlBoard-WirelessCharging/tree/main) 保留上游发布的硬件和固件，附中文导读。
+- [`training-snapshot`](https://github.com/FIyChan/RM2025-PowerControlBoard-WirelessCharging/tree/training-snapshot) 收录本地培训包中的两块功控板 KiCad 工程和三份固件源码差异。两张功控板原理图由 KiCad 10.0 保存。
+
 ## 项目简介
 
 系统面向 RoboMaster 机器人底盘。超级电容组通过双向 Buck-Boost 与底盘直流母线交换能量，在底盘功率需求上升时供能，也可在制动时回收能量。功控板使用 STM32G474，由软件外环更新电流目标，并由 DAC、比较器和 HRTIM 配合完成逐开关周期的峰值电流控制。车载无线充电接收端与超级电容控制共用一颗 MCU。
@@ -15,7 +20,7 @@
 | [无线充电接收线圈](PowerControlBoard_RXCoil_V0.1/) | 接收线圈板与生产资料 |
 | [无线充电发射端硬件](WirelessCharger_V0.1/) | 发射端 KiCad 工程 |
 | [功控板赛场版固件](PowerControlBoard_Software_FieldVersion/) | STM32G474 源码、CubeMX 配置、Makefile 与 CAN 协议说明 |
-| [技术报告](技术报告/) | 原理图、控制框图、设计说明与测试记录 |
+| [技术报告与使用手册](技术报告/) | 技术报告 V1.1、省流版和功控板使用说明 V1.0 |
 | [无线充电发射端固件](https://github.com/hkustenterprize/RM2025-Wireless-Charging-Public) | 上游单独发布的发射端代码 |
 
 ## 从哪里开始读
